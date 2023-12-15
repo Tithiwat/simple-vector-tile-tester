@@ -1,0 +1,115 @@
+<!-- FILEPATH: /Users/tong/Downloads/eda/index.html -->
+<!--
+    This HTML file contains a map application that allows users to input a URL and lon/lat coordinates to display a map.
+    The map is rendered using the MapLibre GL library.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map</title>
+    <meta charset="utf-8" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Input for URL -->
+    <div>
+        <label for="urlInput">URL:</label>
+        <input type="text" id="urlInput" name="urlInput" value="" style="width: 80%;">
+        <button onclick="refreshMap()">Apply</button>
+    </div>
+    
+    <!-- Input for lon/lat coordinates -->
+    <div>
+        <label for="lonlatInput">Lon/Lat:</label>
+        <input type="text" id="lonlatInput" name="lonlatInput" value="101,15" style="width: 80%;">
+        <button onclick="refreshLonLat()">Apply</button>
+    </div>
+    
+    <!-- Map container -->
+    <div id='map' style='position: absolute; top: 5%; bottom: 0; width: 100%; z-index: 1;'></div>
+    
+    <script>
+        // Function to refresh the map based on the lon/lat coordinates
+        function refreshLonLat() {
+            const lonlatInputValue = document.getElementById('lonlatInput').value;
+            const lonlatArray = lonlatInputValue.split(',');
+            const lon = parseFloat(lonlatArray[0]);
+            const lat = parseFloat(lonlatArray[1]);
+
+            // Use the lon and lat values as needed
+            console.log('Longitude:', lon);
+            console.log('Latitude:', lat);
+
+            // Rest of the function code...
+            map.setCenter([lon, lat]);
+        }
+        
+        // Function to refresh the map based on the URL input
+        function refreshMap() {
+            const urlInputValue = document.getElementById('urlInput').value;
+            const url = new URL(urlInputValue);
+            let path = url.pathname;
+            if (path.includes('/')) {
+                path = path.substring(1);
+                path = path.trim();
+            }
+            
+            // Update the map source URL
+            map.getSource('map_plots').setUrl(urlInputValue);
+            
+            // Remove existing map layer
+            map.removeLayer('map_plots_layer');
+            
+            // Add a new map layer with the updated source URL
+            map.addLayer({
+                'id': 'map_plots_layer',
+                'type': 'fill',
+                'source': 'map_plots',
+                'source-layer': path,
+                'layout': {},
+                'paint': {
+                    'fill-color': '#088',
+                    'fill-opacity': 0.8
+                }
+            });
+        }
+
+        // Initialize the map
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL',
+            center: [101,15],
+            zoom: 6,
+        });
+
+        // Add the map source on load
+        map.on('load', function () {
+            map.addSource('map_plots', {
+                'type': 'vector',
+                'url': document.getElementById('urlInput').value
+            });
+        });
+    </script>
+</body>
+
+</html>
